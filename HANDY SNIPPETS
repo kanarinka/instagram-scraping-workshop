@@ -1,0 +1,6 @@
+Fixing excel bugs
+- had to put dialoect=excel for csvwriter
+- had to put encoding=utf-8-sig to write the BOM character in file
+
+Formatting Json - load and dump it
+str(json.loads(json.dumps(comment.text)))
