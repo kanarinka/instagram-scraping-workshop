@@ -1,8 +1,8 @@
 
-kanarinkaprojects/*
-catherinevenvdev/*
+kanarinkaprojects/**
+catherinevenvdev/**
 .DS_Store
-\#datafeminism/*
+\#datafeminism/**
 HANDY SNIPPETS
 *.csv 
 
