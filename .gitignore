@@ -3,6 +3,7 @@ kanarinkaprojects/**
 catherinevenvdev/**
 .DS_Store
 \#datafeminism/**
+\#culturalemergency/**
 HANDY SNIPPETS
 *.csv 
 
@@ -120,3 +121,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+*.zip

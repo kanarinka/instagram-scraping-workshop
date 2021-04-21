@@ -20,12 +20,12 @@ from progress.bar import IncrementalBar
 USER = "kanarinkaprojects"
 
 # Hashtag that you want to download IG posts from
-HASHTAG = "datafeminism"
+HASHTAG_TO_SEARCH = "culturalemergency"
 
-# Limit of posts to download. Limit to 10 or 20 while 
+# Limit of posts to download. Limit to 10 or 20 while
 # testing or else it'll take forever. Set to -1 to get
 # everything.
-LIMIT = 10
+LIMIT = 5
 
 ################################
 
@@ -36,7 +36,7 @@ L.interactive_login(USER)
 # Set up CSV file & header row
 current_time = datetime.now().strftime("%m%d%Y-%H%M%S")
 
-fname = HASHTAG +'-output-' + current_time +'.csv'
+fname = HASHTAG_TO_SEARCH +'-output-' + current_time +'.csv'
 csvFile = open(fname, 'w', encoding="utf-8-sig")
 
 fieldnames = [
@@ -72,24 +72,43 @@ csvWriter.writeheader()
 
 
 # Retrieve hashtag object
-hashtag = instaloader.Hashtag.from_name(L.context, HASHTAG)
 
-print("Retrieved hashtag " + hashtag.name)
-print("Hashtag #" + hashtag.name + " has " + str(hashtag.mediacount) + " items ")
+# Uncomment this after issue #1080 is fixed
+# hashtag = instaloader.Hashtag.from_name(L.context, HASHTAG_TO_SEARCH)
+# print("Retrieved hashtag " + hashtag.name)
+# print("Hashtag #" + hashtag.name + " has " + str(hashtag.mediacount) + " items ")
+# post_count = hashtag.mediacount
+
+# in the meantime, use this workaround specified in issue #874
+post_iterator = instaloader.NodeIterator(
+    L.context, "9b498c08113f1e09617a1703c22b2f32",
+    lambda d: d['data']['hashtag']['edge_hashtag_to_media'],
+    lambda n: instaloader.Post(L.context, n),
+    {'tag_name': HASHTAG_TO_SEARCH},
+    f"https://www.instagram.com/explore/tags/{HASHTAG_TO_SEARCH}/"
+)
+
+print("Retrieved hashtag " + HASHTAG_TO_SEARCH)
+print("Hashtag #" + HASHTAG_TO_SEARCH + " has " + str(post_iterator.count) + " items ")
+post_count = post_iterator.count
+# end workaround
+
 
 # set up progress bar because this takes awhile
-bar = IncrementalBar('Countdown', max = hashtag.mediacount)
+bar = IncrementalBar('Countdown', max = post_count)
 
 if LIMIT > 0:
 	print("Limiting download to " + str(LIMIT) + " posts for testing")
-	bar = IncrementalBar('Countdown', max = LIMIT)
+	bar = IncrementalBar('Countdown', max = min(LIMIT, post_count))
+
 
 # Iterate each post and save media to disk + metadata to spreadsheet
-for post in hashtag.get_posts():
-	
+# for post in hashtag.get_posts():
+# WORKAROUND WITH POST ITERATOR
+for post in post_iterator:
 	# Download the media and metadata as JSON
-	L.download_post(post, target="#"+hashtag.name)
-   
+	L.download_post(post, target="#"+HASHTAG_TO_SEARCH)
+
 	# Format comments for including in CSV
 	all_comments = post.get_comments()
 	users_who_commented = []
